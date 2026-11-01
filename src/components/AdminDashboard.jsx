@@ -13,8 +13,10 @@ import "./AdminDashboard.css";
 
 function AdminDashboard({ onExit }) {
   const { orders, updateOrderStatus } = useContext(OrderContext);
-  const { products, addProduct, deleteProduct } = useContext(ProductContext);
+  const { products, addProduct, updateProduct, deleteProduct } =
+    useContext(ProductContext);
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [editingProductId, setEditingProductId] = useState(null);
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "",
@@ -56,6 +58,54 @@ function AdminDashboard({ onExit }) {
     });
 
     alert("Product added successfully!");
+  };
+
+  const handleUpdateProduct = (e) => {
+    e.preventDefault();
+
+    const updatedProduct = {
+      ...newProduct,
+      price: Number(newProduct.price),
+      oldPrice: Number(newProduct.oldPrice),
+      rating: Number(newProduct.rating),
+      stock: Number(newProduct.stock),
+    };
+
+    updateProduct(editingProductId, updatedProduct);
+
+    setEditingProductId(null);
+
+    setNewProduct({
+      name: "",
+      category: "",
+      price: "",
+      oldPrice: "",
+      rating: "4.5",
+      discount: "",
+      image: "",
+      description: "",
+      stock: "20",
+    });
+
+    alert("Product updated successfully!");
+  };
+
+  const handleEditProduct = (product) => {
+    setEditingProductId(product.id);
+
+    setNewProduct({
+      name: product.name,
+      category: product.category,
+      price: String(product.price),
+      oldPrice: String(product.oldPrice),
+      rating: String(product.rating),
+      discount: product.discount || "",
+      image: product.image,
+      description: product.description,
+      stock: String(product.stock),
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const menuItems = [
@@ -189,8 +239,13 @@ function AdminDashboard({ onExit }) {
 
         {activeTab === "products" && (
           <div className="admin-products">
-            <form className="admin-product-form" onSubmit={handleAddProduct}>
-              <h2>Add New Product</h2>
+            <form
+              className="admin-product-form"
+              onSubmit={
+                editingProductId ? handleUpdateProduct : handleAddProduct
+              }
+            >
+              <h2>{editingProductId ? "Edit Product" : "Add New Product"}</h2>
 
               <input
                 type="text"
@@ -291,8 +346,32 @@ function AdminDashboard({ onExit }) {
               />
 
               <button type="submit" className="admin-add-button">
-                + Add Product
+                {editingProductId ? "Update Product" : "+ Add Product"}
               </button>
+
+              {editingProductId && (
+                <button
+                  type="button"
+                  className="admin-cancel-button"
+                  onClick={() => {
+                    setEditingProductId(null);
+
+                    setNewProduct({
+                      name: "",
+                      category: "",
+                      price: "",
+                      oldPrice: "",
+                      rating: "4.5",
+                      discount: "",
+                      image: "",
+                      description: "",
+                      stock: "20",
+                    });
+                  }}
+                >
+                  Cancel Edit
+                </button>
+              )}
             </form>
             <div className="admin-products-header">
               <h2>Manage Products</h2>
@@ -313,6 +392,13 @@ function AdminDashboard({ onExit }) {
                       <p>Price: ₹{product.price.toLocaleString("en-IN")}</p>
                       <p>Stock: {product.stock}</p>
                     </div>
+
+                    <button
+                      className="admin-edit-button"
+                      onClick={() => handleEditProduct(product)}
+                    >
+                      Edit
+                    </button>
 
                     <button
                       className="admin-delete-button"

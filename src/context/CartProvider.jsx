@@ -1,12 +1,29 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { CartContext } from "./CartContext.js";
+import { ProductContext } from "./ProductContext.js";
 
 export function CartProvider({ children }) {
+  const { products } = useContext(ProductContext);
+
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+
+  // Always use the latest product information
+  const syncedCart = cart
+    .map((item) => {
+      const latestProduct = products.find((product) => product.id === item.id);
+
+      if (!latestProduct) return null;
+
+      return {
+        ...latestProduct,
+        quantity: item.quantity,
+      };
+    })
+    .filter(Boolean);
 
   const addToCart = (product) => {
     setCart((previousCart) => {
@@ -51,11 +68,11 @@ export function CartProvider({ children }) {
   const clearCart = () => {
     setCart([]);
   };
+
   const clearWishlist = () => {
     setWishlist([]);
   };
 
-  // Add or remove products from wishlist
   const toggleWishlist = (product) => {
     setWishlist((previousWishlist) => {
       const exists = previousWishlist.some((item) => item.id === product.id);
@@ -68,16 +85,18 @@ export function CartProvider({ children }) {
     });
   };
 
-  // Remove product from wishlist
   const removeFromWishlist = (id) => {
     setWishlist((previousWishlist) =>
       previousWishlist.filter((item) => item.id !== id),
     );
   };
 
-  const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
+  const cartCount = syncedCart.reduce(
+    (total, item) => total + item.quantity,
+    0,
+  );
 
-  const cartTotal = cart.reduce(
+  const cartTotal = syncedCart.reduce(
     (total, item) => total + item.price * item.quantity,
     0,
   );
@@ -85,7 +104,7 @@ export function CartProvider({ children }) {
   return (
     <CartContext.Provider
       value={{
-        cart,
+        cart: syncedCart,
         addToCart,
         removeFromCart,
         increaseQuantity,

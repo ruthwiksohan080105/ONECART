@@ -367,3 +367,25 @@
     gap: 0;
   }
 }
+.admin-edit-button {
+  padding: 10px 16px;
+  background: #b79558;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.admin-edit-button:hover {
+  background: #987744;
+}
+
+.admin-cancel-button {
+  margin-left: 12px;
+  padding: 12px 20px;
+  background: #eee;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}

@@ -5,13 +5,13 @@ import AppContent from "./components/AppContent";
 
 function App() {
   return (
-    <CartProvider>
-      <OrderProvider>
-        <ProductProvider>
+    <ProductProvider>
+      <CartProvider>
+        <OrderProvider>
           <AppContent />
-        </ProductProvider>
-      </OrderProvider>
-    </CartProvider>
+        </OrderProvider>
+      </CartProvider>
+    </ProductProvider>
   );
 }
 
