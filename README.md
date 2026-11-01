@@ -1,16 +1,131 @@
-# React + Vite
+# ONECART – E-Commerce Web Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ONECART is a modern e-commerce web application built using React. It provides a shopping experience with product browsing, cart management, wishlist, checkout, customer accounts, and an administrative dashboard.
 
-Currently, two official plugins are available:
+## About the Project
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The goal of ONECART is to develop a user-friendly online shopping platform with a clean interface and essential e-commerce functionalities.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Customer Features
+- Browse and explore products.
+- Search and filter products by category and price.
+- Sort products.
+- View detailed product information.
+- Add products to the shopping cart.
+- Increase or decrease product quantities.
+- Add and remove products from the wishlist.
+- Checkout and place orders.
+- View order history and order status.
+- Login and registration interface.
 
-## Expanding the ESLint configuration
+### Admin Features
+- Admin dashboard with order statistics.
+- View and manage customer orders.
+- Update order statuses.
+- View available products.
+- Add new products.
+- Delete existing products.
+- Manage product information and stock.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Technologies Used
+
+- **Frontend:** React.js, JavaScript, HTML5, CSS3
+- **Styling:** CSS
+- **Icons:** Lucide React
+- **Build Tool:** Vite
+- **Version Control:** Git and GitHub
+
+## Project Structure
+
+```text
+ONECART/
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   │   ├── AdminDashboard.jsx
+│   │   ├── Cart.jsx
+│   │   ├── Categories.jsx
+│   │   ├── Checkout.jsx
+│   │   ├── Hero.jsx
+│   │   ├── Login.jsx
+│   │   ├── MyAccount.jsx
+│   │   ├── Navbar.jsx
+│   │   ├── ProductDetails.jsx
+│   │   ├── Products.jsx
+│   │   └── Wishlist.jsx
+│   ├── context/
+│   │   ├── CartContext.js
+│   │   ├── CartProvider.jsx
+│   │   ├── OrderContext.js
+│   │   ├── OrderProvider.jsx
+│   │   ├── ProductContext.js
+│   │   └── ProductProvider.jsx
+│   ├── App.jsx
+│   ├── App.css
+│   ├── index.css
+│   └── main.jsx
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+## Installation and Setup
+
+Follow these steps to run ONECART locally.
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/ruthwiksohan080105/ONECART.git
+```
+
+**2. Navigate to the project directory**
+
+```bash
+cd ONECART
+```
+
+**3. Install dependencies**
+
+```bash
+npm install
+```
+
+**4. Start the development server**
+
+```bash
+npm run dev
+```
+
+**5. Open the local URL**
+
+Open the localhost URL displayed in your terminal, usually:
+
+```text
+http://localhost:5173/
+```
+
+## Current Development Status
+
+ONECART is an ongoing project. Additional functionality and improvements are being developed.
+
+## Future Improvements
+
+- Backend integration.
+- Database connectivity.
+- Secure user authentication and authorization.
+- Persistent product, cart, and order data.
+- Product editing and inventory management.
+- Payment gateway integration.
+- Improved responsive design.
+
+## Author
+
+**Ruthwik Sohan**
+
+GitHub: [ruthwiksohan080105](https://github.com/ruthwiksohan080105)
+
+Portfolio: [View Portfolio](https://ruthwik-sohan.netlify.app)
