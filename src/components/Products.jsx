@@ -12,7 +12,7 @@ import {
 import "./Products.css";
 
 function Products({ onProductClick }) {
-  const { addToCart, cartCount, wishlist, toggleWishlist } =
+  const { addToCart, cartCount, wishlist, toggleWishlist, stockMessage } =
     useContext(CartContext);
   const { products } = useContext(ProductContext);
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,6 +60,12 @@ function Products({ onProductClick }) {
 
   return (
     <section className="products-section" id="trending">
+      {stockMessage && (
+        <div className="stock-notification">
+          <span>⚠️</span>
+          {stockMessage}
+        </div>
+      )}
       <div className="products-heading">
         <div>
           <span className="section-label">HANDPICKED FOR YOU</span>
@@ -180,6 +186,14 @@ function Products({ onProductClick }) {
             <div className="product-info">
               <span className="product-category">{product.category}</span>
 
+              {Number(product.stock) <= 0 ? (
+                <span className="stock-label out-of-stock">OUT OF STOCK</span>
+              ) : Number(product.stock) <= 5 ? (
+                <span className="stock-label low-stock">
+                  Only {product.stock} left in stock
+                </span>
+              ) : null}
+
               <h3
                 onClick={() => onProductClick(product)}
                 style={{ cursor: "pointer" }}
@@ -202,9 +216,11 @@ function Products({ onProductClick }) {
               <button
                 className="add-cart-btn"
                 onClick={() => addToCart(product)}
+                disabled={Number(product.stock) <= 0}
               >
                 <ShoppingBag size={17} />
-                ADD TO CART
+
+                {Number(product.stock) <= 0 ? "OUT OF STOCK" : "ADD TO CART"}
               </button>
             </div>
           </div>

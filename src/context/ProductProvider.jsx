@@ -85,26 +85,97 @@ const initialProducts = [
 export function ProductProvider({ children }) {
   const [products, setProducts] = useState(initialProducts);
 
+  // Add a new product
   const addProduct = (product) => {
     const newProduct = {
       ...product,
       id: Date.now(),
+      stock: Math.max(0, Number(product.stock) || 0),
     };
 
     setProducts((previousProducts) => [...previousProducts, newProduct]);
   };
 
+  // Delete a product
   const deleteProduct = (id) => {
     setProducts((previousProducts) =>
       previousProducts.filter((product) => product.id !== id),
     );
   };
 
+  // Update product details
   const updateProduct = (id, updatedData) => {
     setProducts((previousProducts) =>
       previousProducts.map((product) =>
-        product.id === id ? { ...product, ...updatedData } : product,
+        product.id === id
+          ? {
+              ...product,
+              ...updatedData,
+              ...(updatedData.stock !== undefined && {
+                stock: Math.max(0, Number(updatedData.stock) || 0),
+              }),
+            }
+          : product,
       ),
+    );
+  };
+
+  // Deduct stock when an order is placed
+  const deductStock = (items) => {
+    const quantities = {};
+
+    items.forEach((item) => {
+      quantities[item.id] = (quantities[item.id] || 0) + Number(item.quantity);
+    });
+
+    // Check availability of every product first
+    const hasEnoughStock = Object.entries(quantities).every(
+      ([id, quantity]) => {
+        const product = products.find((product) => product.id === Number(id));
+
+        return (
+          product &&
+          Number.isInteger(quantity) &&
+          quantity > 0 &&
+          Number(product.stock) >= quantity
+        );
+      },
+    );
+
+    if (!hasEnoughStock) {
+      return false;
+    }
+
+    // Deduct stock only after all products pass validation
+    setProducts((previousProducts) =>
+      previousProducts.map((product) =>
+        quantities[product.id]
+          ? {
+              ...product,
+              stock: Number(product.stock) - quantities[product.id],
+            }
+          : product,
+      ),
+    );
+
+    return true;
+  };
+
+  // Restore stock when an order is cancelled
+  const restoreStock = (items) => {
+    setProducts((previousProducts) =>
+      previousProducts.map((product) => {
+        const orderedItem = items.find((item) => item.id === product.id);
+
+        if (!orderedItem) {
+          return product;
+        }
+
+        return {
+          ...product,
+          stock: Number(product.stock) + Number(orderedItem.quantity),
+        };
+      }),
     );
   };
 
@@ -115,6 +186,8 @@ export function ProductProvider({ children }) {
         addProduct,
         deleteProduct,
         updateProduct,
+        deductStock,
+        restoreStock,
       }}
     >
       {children}

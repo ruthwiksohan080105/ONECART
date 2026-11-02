@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { OrderContext } from "./OrderContext.js";
+import { ProductContext } from "./ProductContext.js";
 
 export function OrderProvider({ children }) {
   const [orders, setOrders] = useState([]);
 
+  const { restoreStock } = useContext(ProductContext);
+
+  // Create a new order
   const addOrder = (orderDetails) => {
     const newOrder = {
       id: "ORD" + Date.now(),
@@ -17,6 +21,7 @@ export function OrderProvider({ children }) {
     return newOrder;
   };
 
+  // Update order status
   const updateOrderStatus = (orderId, newStatus) => {
     const validStatuses = [
       "Placed",
@@ -28,6 +33,20 @@ export function OrderProvider({ children }) {
 
     if (!validStatuses.includes(newStatus)) {
       return;
+    }
+
+    const existingOrder = orders.find((order) => order.id === orderId);
+
+    if (!existingOrder) return;
+
+    // Prevent changing an already cancelled order
+    if (existingOrder.status === "Cancelled") {
+      return;
+    }
+
+    // Restore stock only when an order is cancelled
+    if (newStatus === "Cancelled") {
+      restoreStock(existingOrder.items);
     }
 
     setOrders((previousOrders) =>

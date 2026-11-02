@@ -399,3 +399,67 @@
     width: 100%;
   }
 }
+/* STOCK NOTIFICATION */
+
+.stock-notification {
+  position: fixed;
+  top: 90px;
+  right: 25px;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 15px 22px;
+
+  background: #fff5e8;
+  color: #9a5b16;
+
+  border: 1px solid #e8c99e;
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
+
+  animation: stockNotificationIn 0.3s ease;
+}
+
+@keyframes stockNotificationIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+/* STOCK STATUS LABELS */
+
+.stock-label {
+  display: inline-block;
+  width: fit-content;
+  margin: 0 0 0 10px;
+  padding: 5px 12px;
+
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-align: center;
+  vertical-align: middle;
+  border-radius: 20px;
+}
+
+.low-stock {
+  color: #a96817;
+  background: #fff3df;
+}
+
+.out-of-stock {
+  color: #c0392b;
+  background: #fdeaea;
+}

@@ -204,3 +204,52 @@
     height: 100px;
   }
 }
+
+/* WISHLIST STOCK AVAILABILITY */
+
+.wishlist-stock-available {
+  color: #43845b;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 7px;
+}
+
+.wishlist-stock-low {
+  color: #bd812c;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 7px;
+}
+
+.wishlist-stock-out {
+  color: #c0392b;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 7px;
+}
+
+/* DISABLED WISHLIST BUTTON */
+
+.wishlist-add-btn:disabled {
+  background: #d6d2cc;
+  color: #777;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.wishlist-add-btn:disabled:hover {
+  background: #d6d2cc;
+}
+
+/* WISHLIST STOCK NOTIFICATION */
+
+.wishlist-stock-notification {
+  margin: 10px 20px;
+  padding: 12px;
+  background: #fff3e8;
+  color: #a45b16;
+  border: 1px solid #edc99e;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}

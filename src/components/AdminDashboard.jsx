@@ -5,6 +5,11 @@ import {
   Package,
   Users,
   LogOut,
+  Search,
+  Mail,
+  Phone,
+  Eye,
+  ArrowLeft,
 } from "lucide-react";
 
 import { OrderContext } from "../context/OrderContext.js";
@@ -13,10 +18,16 @@ import "./AdminDashboard.css";
 
 function AdminDashboard({ onExit }) {
   const { orders, updateOrderStatus } = useContext(OrderContext);
+
   const { products, addProduct, updateProduct, deleteProduct } =
     useContext(ProductContext);
+
   const [activeTab, setActiveTab] = useState("dashboard");
   const [editingProductId, setEditingProductId] = useState(null);
+
+  const [customerSearch, setCustomerSearch] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+
   const [newProduct, setNewProduct] = useState({
     name: "",
     category: "",
@@ -29,9 +40,81 @@ function AdminDashboard({ onExit }) {
     stock: "20",
   });
 
+  // Dashboard Statistics
+
   const totalRevenue = orders
     .filter((order) => order.status !== "Cancelled")
-    .reduce((total, order) => total + order.total, 0);
+    .reduce((total, order) => total + Number(order.total || 0), 0);
+
+  const pendingOrders = orders.filter((order) =>
+    ["Placed", "Processing"].includes(order.status),
+  ).length;
+
+  // Customer Management
+
+  const customers = Object.values(
+    orders.reduce((result, order) => {
+      const customer = order.customer || {};
+
+      const email = (customer.email || "").trim().toLowerCase();
+
+      const key =
+        email ||
+        [customer.name || "Unknown", customer.phone || ""]
+          .join("-")
+          .toLowerCase();
+
+      if (!result[key]) {
+        result[key] = {
+          id: key,
+          name: customer.name || "Unknown Customer",
+          email: customer.email || "Not available",
+          phone: customer.phone || "Not available",
+          orders: [],
+          totalSpent: 0,
+        };
+      }
+
+      result[key].orders.push(order);
+
+      if (order.status !== "Cancelled") {
+        result[key].totalSpent += Number(order.total || 0);
+      }
+
+      return result;
+    }, {}),
+  );
+
+  const filteredCustomers = customers.filter((customer) => {
+    const search = customerSearch.toLowerCase();
+
+    return (
+      customer.name.toLowerCase().includes(search) ||
+      customer.email.toLowerCase().includes(search) ||
+      customer.phone.toLowerCase().includes(search)
+    );
+  });
+
+  // Reset Product Form
+
+  const resetProductForm = () => {
+    setNewProduct({
+      name: "",
+      category: "",
+      price: "",
+      oldPrice: "",
+      rating: "4.5",
+      discount: "",
+      image: "",
+      description: "",
+      stock: "20",
+    });
+
+    setEditingProductId(null);
+  };
+
+  // Add Product
+
   const handleAddProduct = (e) => {
     e.preventDefault();
 
@@ -45,20 +128,12 @@ function AdminDashboard({ onExit }) {
 
     addProduct(product);
 
-    setNewProduct({
-      name: "",
-      category: "",
-      price: "",
-      oldPrice: "",
-      rating: "4.5",
-      discount: "",
-      image: "",
-      description: "",
-      stock: "20",
-    });
+    resetProductForm();
 
     alert("Product added successfully!");
   };
+
+  // Update Product
 
   const handleUpdateProduct = (e) => {
     e.preventDefault();
@@ -73,22 +148,12 @@ function AdminDashboard({ onExit }) {
 
     updateProduct(editingProductId, updatedProduct);
 
-    setEditingProductId(null);
-
-    setNewProduct({
-      name: "",
-      category: "",
-      price: "",
-      oldPrice: "",
-      rating: "4.5",
-      discount: "",
-      image: "",
-      description: "",
-      stock: "20",
-    });
+    resetProductForm();
 
     alert("Product updated successfully!");
   };
+
+  // Edit Product
 
   const handleEditProduct = (product) => {
     setEditingProductId(product.id);
@@ -108,6 +173,8 @@ function AdminDashboard({ onExit }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // Sidebar Menu
+
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "orders", label: "Orders", icon: ShoppingBag },
@@ -121,6 +188,7 @@ function AdminDashboard({ onExit }) {
         <h2>
           ONE<span>CART</span>
         </h2>
+
         <p>ADMIN PANEL</p>
 
         {menuItems.map((item) => {
@@ -130,7 +198,10 @@ function AdminDashboard({ onExit }) {
             <button
               key={item.id}
               className={activeTab === item.id ? "active" : ""}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                setSelectedCustomer(null);
+              }}
             >
               <Icon size={18} />
               {item.label}
@@ -148,14 +219,18 @@ function AdminDashboard({ onExit }) {
         <header className="admin-header">
           <div>
             <span>ONECART MANAGEMENT</span>
+
             <h1>
               {activeTab === "dashboard"
                 ? "Dashboard"
                 : menuItems.find((item) => item.id === activeTab)?.label}
             </h1>
           </div>
+
           <span className="admin-badge">Administrator</span>
         </header>
+
+        {/* Dashboard */}
 
         {activeTab === "dashboard" && (
           <div className="admin-stats">
@@ -171,16 +246,12 @@ function AdminDashboard({ onExit }) {
 
             <div>
               <span>Pending Orders</span>
-              <h2>
-                {
-                  orders.filter((order) =>
-                    ["Placed", "Processing"].includes(order.status),
-                  ).length
-                }
-              </h2>
+              <h2>{pendingOrders}</h2>
             </div>
           </div>
         )}
+
+        {/* Orders Management */}
 
         {activeTab === "orders" && (
           <div className="admin-orders">
@@ -193,11 +264,15 @@ function AdminDashboard({ onExit }) {
                 <div className="admin-order-card" key={order.id}>
                   <div className="admin-order-details">
                     <span>ORDER ID</span>
+
                     <h3>{order.id}</h3>
 
-                    <p>Customer: {order.customer.name}</p>
-                    <p>Email: {order.customer.email}</p>
-                    <p>Phone: {order.customer.phone}</p>
+                    <p>Customer: {order.customer?.name || "Not available"}</p>
+
+                    <p>Email: {order.customer?.email || "Not available"}</p>
+
+                    <p>Phone: {order.customer?.phone || "Not available"}</p>
+
                     <p>Order Date: {order.date}</p>
 
                     <h4>Products Purchased</h4>
@@ -211,7 +286,7 @@ function AdminDashboard({ onExit }) {
                     ))}
 
                     <h3 className="admin-order-total">
-                      Total: ₹{order.total.toLocaleString("en-IN")}
+                      Total: ₹{Number(order.total || 0).toLocaleString("en-IN")}
                     </h3>
                   </div>
 
@@ -223,6 +298,7 @@ function AdminDashboard({ onExit }) {
                       onChange={(e) =>
                         updateOrderStatus(order.id, e.target.value)
                       }
+                      disabled={order.status === "Cancelled"}
                     >
                       <option value="Placed">Placed</option>
                       <option value="Processing">Processing</option>
@@ -236,6 +312,8 @@ function AdminDashboard({ onExit }) {
             )}
           </div>
         )}
+
+        {/* Products Management */}
 
         {activeTab === "products" && (
           <div className="admin-products">
@@ -340,7 +418,10 @@ function AdminDashboard({ onExit }) {
                 placeholder="Product Description"
                 value={newProduct.description}
                 onChange={(e) =>
-                  setNewProduct({ ...newProduct, description: e.target.value })
+                  setNewProduct({
+                    ...newProduct,
+                    description: e.target.value,
+                  })
                 }
                 required
               />
@@ -353,26 +434,13 @@ function AdminDashboard({ onExit }) {
                 <button
                   type="button"
                   className="admin-cancel-button"
-                  onClick={() => {
-                    setEditingProductId(null);
-
-                    setNewProduct({
-                      name: "",
-                      category: "",
-                      price: "",
-                      oldPrice: "",
-                      rating: "4.5",
-                      discount: "",
-                      image: "",
-                      description: "",
-                      stock: "20",
-                    });
-                  }}
+                  onClick={resetProductForm}
                 >
                   Cancel Edit
                 </button>
               )}
             </form>
+
             <div className="admin-products-header">
               <h2>Manage Products</h2>
               <span>Total Products: {products.length}</span>
@@ -417,11 +485,156 @@ function AdminDashboard({ onExit }) {
           </div>
         )}
 
+        {/* Customer Management */}
+
         {activeTab === "customers" && (
-          <div className="admin-placeholder">
-            <Users size={35} />
-            <h2>Customer Management</h2>
-            <p>We'll connect customer management in a later step.</p>
+          <div className="admin-customers">
+            {selectedCustomer ? (
+              <>
+                <button
+                  className="customer-back-btn"
+                  onClick={() => setSelectedCustomer(null)}
+                >
+                  <ArrowLeft size={16} />
+                  Back to Customers
+                </button>
+
+                <div className="customer-detail-card">
+                  <div className="customer-detail-avatar">
+                    <Users size={28} />
+                  </div>
+
+                  <h2>{selectedCustomer.name}</h2>
+                  <p>{selectedCustomer.email}</p>
+
+                  <div className="customer-detail-info">
+                    <div>
+                      <Mail size={17} />
+                      <span>{selectedCustomer.email}</span>
+                    </div>
+
+                    <div>
+                      <Phone size={17} />
+                      <span>{selectedCustomer.phone}</span>
+                    </div>
+                  </div>
+
+                  <div className="customer-stats">
+                    <div>
+                      <span>Total Orders</span>
+                      <h3>{selectedCustomer.orders.length}</h3>
+                    </div>
+
+                    <div>
+                      <span>Total Spending</span>
+                      <h3>
+                        ₹{selectedCustomer.totalSpent.toLocaleString("en-IN")}
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="customer-history">
+                  <h2>Order History</h2>
+
+                  {selectedCustomer.orders.map((order) => (
+                    <div className="customer-history-card" key={order.id}>
+                      <div>
+                        <label>ORDER ID</label>
+                        <h3>{order.id}</h3>
+                        <p>Date: {order.date}</p>
+                        <p>Products: {order.items.length}</p>
+                      </div>
+
+                      <div className="customer-history-right">
+                        <span
+                          className={`customer-status status-${order.status.toLowerCase()}`}
+                        >
+                          {order.status}
+                        </span>
+
+                        <strong>
+                          ₹{Number(order.total || 0).toLocaleString("en-IN")}
+                        </strong>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="customer-section-heading">
+                  <div>
+                    <h2>Customer Management</h2>
+                    <p>View and manage your customers.</p>
+                  </div>
+
+                  <span className="customer-count">
+                    Total Customers: {customers.length}
+                  </span>
+                </div>
+
+                <div className="customer-search">
+                  <Search size={18} />
+
+                  <input
+                    type="text"
+                    placeholder="Search by name, email or phone..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                  />
+                </div>
+
+                {filteredCustomers.length === 0 ? (
+                  <div className="customer-empty">
+                    <Users size={35} />
+                    <h3>No customers found</h3>
+
+                    <p>
+                      {customers.length === 0
+                        ? "Customers will appear after their first order."
+                        : "Try searching with another name, email or phone."}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="customer-list">
+                    {filteredCustomers.map((customer) => (
+                      <div className="customer-card" key={customer.id}>
+                        <div className="customer-avatar">
+                          <Users size={22} />
+                        </div>
+
+                        <div className="customer-main-info">
+                          <h3>{customer.name}</h3>
+                          <p>{customer.email}</p>
+                          <p>{customer.phone}</p>
+                        </div>
+
+                        <div className="customer-order-count">
+                          <span>Total Orders</span>
+                          <strong>{customer.orders.length}</strong>
+                        </div>
+
+                        <div className="customer-spending">
+                          <span>Total Spending</span>
+                          <strong>
+                            ₹{customer.totalSpent.toLocaleString("en-IN")}
+                          </strong>
+                        </div>
+
+                        <button
+                          className="customer-view-btn"
+                          onClick={() => setSelectedCustomer(customer)}
+                        >
+                          <Eye size={16} />
+                          View
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
       </main>

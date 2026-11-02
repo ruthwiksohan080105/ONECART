@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+
 import Navbar from "./Navbar";
 import Hero from "./Hero";
 import Categories from "./Categories";
@@ -8,10 +9,10 @@ import Wishlist from "./Wishlist";
 import Checkout from "./Checkout";
 import ProductDetails from "./ProductDetails";
 import Login from "./Login";
-import { useContext } from "react";
-import { CartContext } from "../context/CartContext.js";
 import MyAccount from "./MyAccount";
 import AdminDashboard from "./AdminDashboard";
+
+import { CartContext } from "../context/CartContext.js";
 
 function AppContent() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -30,6 +31,14 @@ function AppContent() {
     clearWishlist();
   };
 
+  // Update logged-in user's profile
+  const handleProfileUpdate = (updatedUser) => {
+    setCurrentUser((previousUser) => ({
+      ...previousUser,
+      ...updatedUser,
+    }));
+  };
+
   return (
     <>
       {adminOpen ? (
@@ -46,6 +55,7 @@ function AppContent() {
               currentUser={currentUser}
               onBack={() => setAccountOpen(false)}
               onLogout={handleLogout}
+              onUpdateUser={handleProfileUpdate}
             />
           ) : (
             <>

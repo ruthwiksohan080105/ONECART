@@ -134,34 +134,76 @@
   color: #c44;
 }
 
-/* Empty Cart */
+/* EMPTY CART - PREMIUM DESIGN */
+
 .empty-cart {
-  min-height: 300px;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  gap: 14px;
+  padding: 35px 25px;
+  gap: 15px;
   color: #777;
 }
 
+.empty-cart-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #f4f0e8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #aa8956;
+  margin-bottom: 8px;
+}
+
+.empty-cart-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #aa8956;
+}
+
 .empty-cart h3 {
-  color: #222;
+  color: #191919;
+  font-size: 25px;
+  font-weight: 600;
+  margin: 0;
 }
 
 .empty-cart p {
+  max-width: 270px;
   font-size: 13px;
+  line-height: 1.8;
+  color: #888;
 }
 
 .empty-cart button {
-  margin-top: 10px;
-  padding: 13px 20px;
+  margin-top: 12px;
+  padding: 15px 25px;
   background: #191919;
   color: white;
   border: none;
   font-size: 11px;
+  font-weight: 600;
   letter-spacing: 1px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.empty-cart button:hover {
+  background: #aa8956;
+  transform: translateY(-2px);
+}
+
+.empty-cart-footer {
+  margin-top: 20px;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #aaa;
 }
 
 /* Cart Footer */
@@ -223,4 +265,46 @@
     width: 75px;
     height: 90px;
   }
+}
+/* CART STOCK AVAILABILITY */
+
+.cart-stock-available {
+  color: #43845b;
+  font-size: 12px;
+  margin: 5px 0;
+  font-weight: 600;
+}
+
+.cart-stock-low {
+  color: #bd812c;
+  font-size: 12px;
+  margin: 5px 0;
+  font-weight: 600;
+}
+
+.cart-stock-unavailable {
+  color: #c0392b;
+  font-size: 12px;
+  margin: 5px 0;
+  font-weight: 600;
+}
+
+/* DISABLED QUANTITY BUTTON */
+
+.quantity-controls button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* CART STOCK NOTIFICATION */
+
+.cart-stock-notification {
+  margin: 10px 20px;
+  padding: 12px;
+  background: #fff3e8;
+  color: #a45b16;
+  border: 1px solid #edc99e;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
 }

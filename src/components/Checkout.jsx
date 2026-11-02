@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { CartContext } from "../context/CartContext.js";
 import { OrderContext } from "../context/OrderContext.js";
+import { ProductContext } from "../context/ProductContext.js";
 import {
   ArrowLeft,
   ShoppingBag,
@@ -15,10 +16,12 @@ function Checkout() {
   const { cart, cartTotal, checkoutOpen, setCheckoutOpen, clearCart } =
     useContext(CartContext);
   const { addOrder } = useContext(OrderContext);
+  const { deductStock } = useContext(ProductContext);
 
   const [payment, setPayment] = useState("cod");
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrder, setPlacedOrder] = useState(null);
+  const [checkoutError, setCheckoutError] = useState("");
 
   const deliveryCharge = cartTotal >= 999 ? 0 : 99;
   const grandTotal = cartTotal + deliveryCharge;
@@ -44,6 +47,18 @@ function Checkout() {
     event.preventDefault();
 
     if (cart.length === 0) return;
+
+    // Validate and deduct available stock
+    const stockDeducted = deductStock(cart);
+
+    if (!stockDeducted) {
+      setCheckoutError(
+        "Some products are no longer available in the requested quantity. Please review your cart.",
+      );
+      return;
+    }
+
+    setCheckoutError("");
 
     const orderDetails = {
       customer: { ...customer },
@@ -321,6 +336,10 @@ function Checkout() {
                     <strong>₹{grandTotal.toLocaleString("en-IN")}</strong>
                   </div>
                 </div>
+
+                {checkoutError && (
+                  <div className="checkout-stock-error">⚠️ {checkoutError}</div>
+                )}
 
                 <button
                   type="submit"

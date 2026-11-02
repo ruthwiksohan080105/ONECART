@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { X, Heart, ShoppingBag, Trash2 } from "lucide-react";
 
 import { CartContext } from "../context/CartContext.js";
+import { ProductContext } from "../context/ProductContext.js";
 import "./Wishlist.css";
 
 function Wishlist() {
@@ -11,13 +12,25 @@ function Wishlist() {
     setWishlistOpen,
     removeFromWishlist,
     addToCart,
+    stockMessage,
   } = useContext(CartContext);
+
+  const { products } = useContext(ProductContext);
 
   if (!wishlistOpen) return null;
 
+  // Always display the latest product information
+  const syncedWishlist = wishlist
+    .map((savedItem) => products.find((product) => product.id === savedItem.id))
+    .filter(Boolean);
+
+  // Add to cart and remove from wishlist only on success
   const handleAddToCart = (product) => {
-    addToCart(product);
-    removeFromWishlist(product.id);
+    const added = addToCart(product);
+
+    if (added) {
+      removeFromWishlist(product.id);
+    }
   };
 
   return (
@@ -30,7 +43,7 @@ function Wishlist() {
         <div className="wishlist-header">
           <div>
             <h2>My Wishlist</h2>
-            <p>{wishlist.length} saved products</p>
+            <p>{syncedWishlist.length} saved products</p>
           </div>
 
           <button
@@ -44,7 +57,7 @@ function Wishlist() {
 
         {/* Wishlist Products */}
         <div className="wishlist-items">
-          {wishlist.length === 0 ? (
+          {syncedWishlist.length === 0 ? (
             <div className="wishlist-empty">
               <Heart size={48} />
 
@@ -57,7 +70,7 @@ function Wishlist() {
               </button>
             </div>
           ) : (
-            wishlist.map((product) => (
+            syncedWishlist.map((product) => (
               <div className="wishlist-item" key={product.id}>
                 <img src={product.image} alt={product.name} />
 
@@ -68,12 +81,27 @@ function Wishlist() {
 
                   <strong>₹{product.price.toLocaleString("en-IN")}</strong>
 
+                  {/* Stock Availability */}
+                  {Number(product.stock) <= 0 ? (
+                    <p className="wishlist-stock-out">OUT OF STOCK</p>
+                  ) : Number(product.stock) <= 5 ? (
+                    <p className="wishlist-stock-low">
+                      Only {product.stock} left in stock
+                    </p>
+                  ) : (
+                    <p className="wishlist-stock-available">In stock</p>
+                  )}
+
                   <button
                     className="wishlist-add-btn"
                     onClick={() => handleAddToCart(product)}
+                    disabled={Number(product.stock) <= 0}
                   >
                     <ShoppingBag size={15} />
-                    ADD TO CART
+
+                    {Number(product.stock) <= 0
+                      ? "OUT OF STOCK"
+                      : "MOVE TO CART"}
                   </button>
                 </div>
 
@@ -89,8 +117,13 @@ function Wishlist() {
           )}
         </div>
 
+        {/* Stock Notification */}
+        {stockMessage && syncedWishlist.length > 0 && (
+          <div className="wishlist-stock-notification">⚠️ {stockMessage}</div>
+        )}
+
         {/* Footer */}
-        {wishlist.length > 0 && (
+        {syncedWishlist.length > 0 && (
           <div className="wishlist-footer">
             <button onClick={() => setWishlistOpen(false)}>
               CONTINUE SHOPPING

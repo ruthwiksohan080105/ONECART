@@ -14,6 +14,7 @@ function Cart() {
     decreaseQuantity,
     cartTotal,
     setCheckoutOpen,
+    stockMessage,
   } = useContext(CartContext);
 
   if (!cartOpen) return null;
@@ -41,13 +42,33 @@ function Cart() {
         <div className="cart-items">
           {cart.length === 0 ? (
             <div className="empty-cart">
-              <ShoppingBag size={45} />
-              <h3>Your cart is empty</h3>
-              <p>Discover something you'll love.</p>
+              <div className="empty-cart-icon">
+                <ShoppingBag size={42} strokeWidth={1.3} />
+              </div>
 
-              <button onClick={() => setCartOpen(false)}>
-                CONTINUE SHOPPING
+              <span className="empty-cart-label">YOUR SHOPPING BAG</span>
+
+              <h3>Your cart is waiting.</h3>
+
+              <p>
+                Looks like you haven't added anything yet. Discover something
+                special and make it yours.
+              </p>
+
+              <button
+                onClick={() => {
+                  setCartOpen(false);
+                  document.getElementById("trending")?.scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }}
+              >
+                EXPLORE PRODUCTS →
               </button>
+
+              <span className="empty-cart-footer">
+                GOOD FINDS. GREAT CHOICES. ONECART.
+              </span>
             </div>
           ) : (
             cart.map((item) => (
@@ -61,6 +82,17 @@ function Cart() {
                     ₹{item.price.toLocaleString("en-IN")}
                   </p>
 
+                  {/* Stock Availability */}
+                  {Number(item.stock) <= 0 ? (
+                    <p className="cart-stock-unavailable">Out of stock</p>
+                  ) : Number(item.stock) <= 5 ? (
+                    <p className="cart-stock-low">
+                      Only {item.stock} left in stock
+                    </p>
+                  ) : (
+                    <p className="cart-stock-available">In stock</p>
+                  )}
+
                   <div className="quantity-controls">
                     <button
                       onClick={() => decreaseQuantity(item.id)}
@@ -73,6 +105,10 @@ function Cart() {
 
                     <button
                       onClick={() => increaseQuantity(item.id)}
+                      disabled={
+                        item.quantity >= Number(item.stock) ||
+                        Number(item.stock) <= 0
+                      }
                       aria-label="Increase quantity"
                     >
                       <Plus size={14} />
@@ -97,6 +133,11 @@ function Cart() {
             ))
           )}
         </div>
+
+        {/* Stock Notification */}
+        {stockMessage && cart.length > 0 && (
+          <div className="cart-stock-notification">⚠️ {stockMessage}</div>
+        )}
 
         {/* Cart Footer */}
         {cart.length > 0 && (
