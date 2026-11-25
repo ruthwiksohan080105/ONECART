@@ -50,6 +50,61 @@ function AdminDashboard({ onExit }) {
     ["Placed", "Processing"].includes(order.status),
   ).length;
 
+  // Dashboard Analytics
+
+  const completedOrders = orders.filter(
+    (order) => order.status === "Delivered",
+  ).length;
+
+  const cancelledOrders = orders.filter(
+    (order) => order.status === "Cancelled",
+  ).length;
+
+  const activeOrders = orders.filter((order) => order.status !== "Cancelled");
+
+  const averageOrderValue =
+    activeOrders.length > 0 ? totalRevenue / activeOrders.length : 0;
+
+  const lowStockProducts = products.filter(
+    (product) => Number(product.stock) <= 5,
+  ).length;
+
+  const orderStatuses = [
+    { label: "Placed", color: "#b79558" },
+    { label: "Processing", color: "#6c8ebf" },
+    { label: "Shipped", color: "#8b79b8" },
+    { label: "Delivered", color: "#43845b" },
+    { label: "Cancelled", color: "#c0392b" },
+  ].map((status) => ({
+    ...status,
+    count: orders.filter((order) => order.status === status.label).length,
+  }));
+
+  const topSellingProducts = Object.values(
+    activeOrders.reduce((result, order) => {
+      (order.items || []).forEach((item) => {
+        const key = item.id;
+
+        if (!result[key]) {
+          result[key] = {
+            id: key,
+            name: item.name,
+            quantity: 0,
+            revenue: 0,
+          };
+        }
+
+        result[key].quantity += Number(item.quantity || 0);
+        result[key].revenue +=
+          Number(item.price || 0) * Number(item.quantity || 0);
+      });
+
+      return result;
+    }, {}),
+  )
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 5);
+
   // Customer Management
 
   const customers = Object.values(
@@ -233,20 +288,129 @@ function AdminDashboard({ onExit }) {
         {/* Dashboard */}
 
         {activeTab === "dashboard" && (
-          <div className="admin-stats">
-            <div>
-              <span>Total Orders</span>
-              <h2>{orders.length}</h2>
+          <div className="admin-analytics">
+            {/* Main Statistics */}
+            <div className="admin-stats">
+              <div>
+                <span>Total Orders</span>
+                <h2>{orders.length}</h2>
+              </div>
+
+              <div>
+                <span>Total Revenue</span>
+                <h2>₹{totalRevenue.toLocaleString("en-IN")}</h2>
+              </div>
+
+              <div>
+                <span>Pending Orders</span>
+                <h2>{pendingOrders}</h2>
+              </div>
             </div>
 
-            <div>
-              <span>Total Revenue</span>
-              <h2>₹{totalRevenue.toLocaleString("en-IN")}</h2>
+            {/* Additional Statistics */}
+            <div className="analytics-grid">
+              <div className="analytics-card">
+                <span>Total Products</span>
+                <h2>{products.length}</h2>
+                <p>Products in your store</p>
+              </div>
+
+              <div className="analytics-card">
+                <span>Total Customers</span>
+                <h2>{customers.length}</h2>
+                <p>Customers who placed orders</p>
+              </div>
+
+              <div className="analytics-card">
+                <span>Delivered Orders</span>
+                <h2>{completedOrders}</h2>
+                <p>Successfully delivered</p>
+              </div>
+
+              <div className="analytics-card">
+                <span>Average Order Value</span>
+                <h2>
+                  ₹{Math.round(averageOrderValue).toLocaleString("en-IN")}
+                </h2>
+                <p>Per non-cancelled order</p>
+              </div>
+
+              <div className="analytics-card">
+                <span>Low Stock Products</span>
+                <h2>{lowStockProducts}</h2>
+                <p>Products with 5 or fewer items</p>
+              </div>
+
+              <div className="analytics-card">
+                <span>Cancelled Orders</span>
+                <h2>{cancelledOrders}</h2>
+                <p>Cancelled transactions</p>
+              </div>
             </div>
 
-            <div>
-              <span>Pending Orders</span>
-              <h2>{pendingOrders}</h2>
+            {/* Analytics Panels */}
+            <div className="analytics-panels">
+              {/* Order Status */}
+              <div className="analytics-panel">
+                <h2>Order Status Overview</h2>
+                <p className="analytics-subtitle">
+                  Current distribution of all orders
+                </p>
+
+                {orderStatuses.map((status) => {
+                  const percentage =
+                    orders.length > 0
+                      ? (status.count / orders.length) * 100
+                      : 0;
+
+                  return (
+                    <div className="status-analytics" key={status.label}>
+                      <div className="status-analytics-heading">
+                        <span>{status.label}</span>
+                        <strong>{status.count}</strong>
+                      </div>
+
+                      <div className="analytics-progress">
+                        <div
+                          style={{
+                            width: `${percentage}%`,
+                            background: status.color,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Top Selling Products */}
+              <div className="analytics-panel">
+                <h2>Top Selling Products</h2>
+                <p className="analytics-subtitle">
+                  Based on non-cancelled orders
+                </p>
+
+                {topSellingProducts.length === 0 ? (
+                  <div className="analytics-empty">
+                    No sales data available yet.
+                  </div>
+                ) : (
+                  topSellingProducts.map((product, index) => (
+                    <div className="top-product-row" key={product.id}>
+                      <div className="top-product-rank">{index + 1}</div>
+
+                      <div className="top-product-info">
+                        <h3>{product.name}</h3>
+                        <p>{product.quantity} units sold</p>
+                      </div>
+
+                      <strong>
+                        ₹{product.revenue.toLocaleString("en-IN")}
+                      </strong>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         )}

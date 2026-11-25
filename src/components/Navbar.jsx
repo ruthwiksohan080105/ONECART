@@ -11,6 +11,7 @@ function Navbar({
   onAdminClick,
 }) {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { cartCount, setCartOpen, wishlist, setWishlistOpen } =
     useContext(CartContext);
   return (
@@ -110,9 +111,44 @@ function Navbar({
         </button>
 
         {/* Mobile Menu Icon */}
-        <button className="mobile-menu" aria-label="Open menu">
+        <button
+          className="mobile-menu"
+          aria-label="Toggle navigation menu"
+          aria-expanded={mobileMenuOpen}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
           <Menu />
         </button>
+
+        {mobileMenuOpen && (
+          <div className="mobile-nav-dropdown">
+            <a href="#home" onClick={() => setMobileMenuOpen(false)}>
+              Home
+            </a>
+
+            <a href="#categories" onClick={() => setMobileMenuOpen(false)}>
+              Categories
+            </a>
+
+            <a href="#trending" onClick={() => setMobileMenuOpen(false)}>
+              Trending
+            </a>
+
+            <a href="#offers" onClick={() => setMobileMenuOpen(false)}>
+              Offers
+            </a>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onAdminClick();
+              }}
+            >
+              Admin Panel
+            </button>
+          </div>
+        )}
       </nav>
     </>
   );
